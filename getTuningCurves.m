@@ -88,7 +88,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		end
 		matFittedResp(intNeuron,:) = feval(funcFit,matFittedParams(intNeuron,:),vecUniqueRads);
 		matVariance(intNeuron,:) = 1 - (besseli(1,matFittedParams(intNeuron,indKappa)) ./ besseli(0,matFittedParams(intNeuron,indKappa))); %var=1-I1(k)/I0(k)
-		matBandwidth(intNeuron,:) = 2*acos(1-((1/matFittedParams(intNeuron,indKappa))*log(2)));%FWHM=2*arccos(1- [(1/kappa) * ln(2)] )
+		matBandwidth(intNeuron,:) = 2*acos(1-((1./matFittedParams(intNeuron,indKappa))*log(2)));%FWHM=2*arccos(1- [(1/kappa) * ln(2)] )
 		matMeanResp(intNeuron,:) = vecMeanRespPerOri;
 		matSDResp(intNeuron,:) = vecSDRespPerOri;
 		
@@ -99,7 +99,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 			plot(vecUniqueRads,matFittedResp(intNeuron,:));
 			hold off
 			drawnow
-			pause(0.5)
+			pause
 		end
 	end
 	
