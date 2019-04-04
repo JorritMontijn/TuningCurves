@@ -18,7 +18,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	%	of responses per orientation, as above
 	%sOut.indKappa = logical vector indicating which parameters are kappas
 	%sOut.matFittedParams = [Neuron x parameters] matrix with von Mises
-	%	parameters after fitting (4 or 5 parameters for ori/dir respectively) 
+	%	parameters after fitting (4 or 5 parameters for ori/dir respectively)
 	%sOut.matFittedResp = [Neuron x Orientation] matrix of fitted responses
 	%sOut.matVariance = [Neuron x (1 or 2)] variance per neuron per
 	%	response peak (1 for orientation, 2 for direction)
@@ -81,8 +81,11 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		vecP0 = [dblPrefOri vecKappa dblBaseline dblGain];
 		
 		%do fitting & save data
-		matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
-		%matFittedParams(intNeuron,:) = lsqcurvefit(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa 0 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
+		if exist('curvefitfun.m','file')
+			matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
+		else
+			matFittedParams(intNeuron,:) = lsqcurvefit(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
+		end
 		matFittedResp(intNeuron,:) = feval(funcFit,matFittedParams(intNeuron,:),vecUniqueRads);
 		matVariance(intNeuron,:) = 1 - (besseli(1,matFittedParams(intNeuron,indKappa)) ./ besseli(0,matFittedParams(intNeuron,indKappa))); %var=1-I1(k)/I0(k)
 		matBandwidth(intNeuron,:) = 2*acos(1-((1/matFittedParams(intNeuron,indKappa))*log(2)));%FWHM=2*arccos(1- [(1/kappa) * ln(2)] )
@@ -90,13 +93,13 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		matSDResp(intNeuron,:) = vecSDRespPerOri;
 		
 		if boolPlot
-		cla;
-		errorbar(vecUniqueRads,vecMeanRespPerOri,vecSDRespPerOri);
-		hold on
-		plot(vecUniqueRads,matFittedResp(intNeuron,:));
-		hold off
-		drawnow
-		pause(0.5)
+			cla;
+			errorbar(vecUniqueRads,vecMeanRespPerOri,vecSDRespPerOri);
+			hold on
+			plot(vecUniqueRads,matFittedResp(intNeuron,:));
+			hold off
+			drawnow
+			pause(0.5)
 		end
 	end
 	
