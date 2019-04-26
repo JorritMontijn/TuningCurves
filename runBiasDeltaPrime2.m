@@ -1,4 +1,5 @@
 %% set paramaters for data generation
+strFigDir = 'D:\Data\ResultsOriMetric\';
 intN=100;
 vecRep=3:100;
 vecDistDprime = 5*[0 1 2 3 4];

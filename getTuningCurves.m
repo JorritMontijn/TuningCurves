@@ -28,7 +28,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	%	By Jorrit Montijn (Alex Pouget lab), 22-02-18 (dd-mm-yy; Universite de Geneve)
 	
 	%% header
-	boolPlot=true;
+	boolPlot=false;
 	matResp = double(matResp);
 	%vecStimOriDegrees =  vecTrialOris;
 	
@@ -94,7 +94,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		
 		if boolPlot
 			cla;
-			errorbar(vecUniqueRads,vecMeanRespPerOri,vecSDRespPerOri);
+			errorbar(vecUniqueRads,vecMeanRespPerOri,vecSDRespPerOri./sqrt(size(matRespNSR,3)));
 			hold on
 			plot(vecUniqueRads,matFittedResp(intNeuron,:));
 			hold off

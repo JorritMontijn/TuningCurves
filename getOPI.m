@@ -9,7 +9,7 @@ function vecOPI = getOPI(matResp,vecTrialAngles)
 	% - vecAngles; [1 x Trial] stimulus orientation vector  [in radians]
 	%
 	%Version History:
-	%2019-03-20 Created OSI function [by Jorrit Montijn]
+	%2019-03-20 Created OPI function [by Jorrit Montijn]
 	
 	%check input
 	if numel(vecTrialAngles) ~= size(matResp,2)
@@ -17,14 +17,24 @@ function vecOPI = getOPI(matResp,vecTrialAngles)
 	end
 	
 	% prep
+	matResp = matResp - min(matResp,[],2);
 	intN = size(matResp,1);
 	vecOPI = nan(intN,1);
 	[vecAngleIdx,vecUniqueAngles] = label2idx(vecTrialAngles);
+	intStimNum = numel(vecUniqueAngles);
 	
 	%run loop
 	for intN=1:size(matResp,1)
-		vecR = accumarray(vecAngleIdx',matResp(intN,:));
-		vecOPI(intN) =  1 - circ_var(vecUniqueAngles(:),vecR);
+		vecTrialResp = matResp(intN,:);
+		vecTrialAngleIdx = vecAngleIdx;
+		vecTrialAngleIdx(isnan(vecTrialResp)) = [];
+		vecTrialResp(isnan(vecTrialResp)) = [];
+		vecAngleResp = nan(1,intStimNum);
+		for intStimIdx=1:intStimNum
+			vecAngleResp(intStimIdx) = nanmean(vecTrialResp(vecTrialAngleIdx==intStimIdx));
+		end
+		%vecAngleResp = vecAngleResp - min(vecAngleResp);
+		vecOPI(intN) =  1 - circ_var(vecUniqueAngles(:),vecAngleResp(:));
 	end
 end
 

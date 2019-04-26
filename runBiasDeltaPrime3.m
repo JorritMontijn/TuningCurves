@@ -1,5 +1,5 @@
 %% set paramaters for data generation
-strFigDir = 'D:\Data\ResultsOriMetricDeltaPrime\';
+strFigDir = 'D:\Data\ResultsOriMetric\';
 intN=100;
 
 vecHzDiff = [0:20];

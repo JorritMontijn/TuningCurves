@@ -1,12 +1,13 @@
 %% set paramaters for data generation
 clear all;close all;
-strFigDir = 'D:\Data\ResultsOriMetric\';
+strFigDir = 'D:\Data\ResultsOriMetric';
 intN=100;
-intNumPops = 10;
+intNumPops = 5;
 
+vecKappas = [20.342 9.106 5.174]; %FWHM: [15 22.5 30]
 vecHzDiff = [0:0.5:3 4:20];
-vecUniqueAngles = deg2rad(0:45:359);
-intRandIters = 100;
+vecUniqueAngles = deg2rad(0:10:359);
+intRandIters = 50;
 
 %new maximized figure
 h1 = figure;
@@ -47,29 +48,30 @@ for intPlot=1:6
 		dblKappa=1;%9.106;1;25
 		
 	end
-	dblFWHM = rad2deg(2*acos(1- [(1/dblKappa) * log(2)])); %45 degs for kappa=9.106
+	dblFWHM = rad2deg(2*acos(1- [(1/dblKappa) * log(2)]))/2; %45 degs for kappa=9.106
 	
 	% pre-allocate
 	matMeanDeltaPrimeBC = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
-	matMeanDeltaPrime = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
+	matMeanTuningRho = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matMeanOSI = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matMeanOPI = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matCIDeltaPrimeBC = nan([numel(vecRep) numel(vecHzDiff) 2 intNumPops]);
-	matCIDeltaPrime = nan([numel(vecRep) numel(vecHzDiff) 2 intNumPops]);
+	matCITuningRho = nan([numel(vecRep) numel(vecHzDiff) 2 intNumPops]);
 	matCIOSI = nan([numel(vecRep) numel(vecHzDiff) 2 intNumPops]);
 	matCIOPI = nan([numel(vecRep) numel(vecHzDiff) 2 intNumPops]);
 	
 	matMeanZscoreDeltaPrimeBC = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
-	matMeanZscoreDeltaPrime = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
+	matMeanZscoreTuningRho = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matMeanZscoreOSI = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matMeanZscoreOPI = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matSdZscoreDeltaPrimeBC = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
-	matSdZscoreDeltaPrime = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
+	matSdZscoreTuningRho = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matSdZscoreOSI = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	matSdZscoreOPI = nan([numel(vecRep) numel(vecHzDiff) intNumPops]);
 	
 	for intD=1:numel(vecHzDiff)
-		dblHzDiff = vecHzDiff(intD)
+		dblHzDiff = vecHzDiff(intD);
+		fprintf('Now at %.2f Hz (%d/%d) [%s]\n',dblHzDiff,intD,numel(vecHzDiff),getTime);
 		for intC=1:numel(vecRep)
 			%get nr of reps
 			intRep = vecRep(intC);
@@ -79,7 +81,7 @@ for intPlot=1:6
 			for intPop=1:intNumPops
 			% pre-allocate
 			matShuffDeltaPrimeBC = nan(intN,intRandIters);
-			matShuffDeltaPrime = nan(intN,intRandIters);
+			matShuffTuningRho = nan(intN,intRandIters);
 			matShuffOPI = nan(intN,intRandIters);
 			matShuffOSI = nan(intN,intRandIters);
 			
@@ -91,7 +93,7 @@ for intPlot=1:6
 			vecDeltaPrimeBC = getDeltaPrime(matResp,vecTrialAngles,true);
 			
 			% get non-corrected delta prime
-			vecDeltaPrime = getDeltaPrime(matResp,vecTrialAngles,false);
+			vecTuningRho = getTuningRho(matResp,vecTrialAngles);
 			
 			%get OSI
 			vecOSI = getOSI(matResp,vecTrialAngles);
@@ -107,7 +109,7 @@ for intPlot=1:6
 				matShuffDeltaPrimeBC(:,intIter) = getDeltaPrime(matResp,vecShuffledTrialAngles,true);
 				
 				% get non-corrected delta prime
-				matShuffDeltaPrime(:,intIter) = getDeltaPrime(matResp,vecShuffledTrialAngles,false);
+				matShuffTuningRho(:,intIter) = getTuningRho(matResp,vecShuffledTrialAngles,false);
 				
 				%get OSI
 				matShuffOSI(:,intIter) = getOSI(matResp,vecShuffledTrialAngles);
@@ -119,8 +121,8 @@ for intPlot=1:6
 			%get means
 			vecMeanShuffDeltaPrimeBC = nanmean(matShuffDeltaPrimeBC,2);
 			vecSdShuffDeltaPrimeBC = nanstd(matShuffDeltaPrimeBC,[],2);
-			vecMeanShuffDeltaPrime = nanmean(matShuffDeltaPrime,2);
-			vecSdShuffDeltaPrime = nanstd(matShuffDeltaPrime,[],2);
+			vecMeanShuffTuningRho = nanmean(matShuffTuningRho,2);
+			vecSdShuffTuningRho = nanstd(matShuffTuningRho,[],2);
 			vecMeanShuffOSI= nanmean(matShuffOSI,2);
 			vecSdShuffOSI= nanstd(matShuffOSI,[],2);
 			vecMeanShuffOPI = nanmean(matShuffOPI,2);
@@ -128,20 +130,25 @@ for intPlot=1:6
 			
 			% get z-scores
 			vecZscoreDeltaPrimeBC = (vecDeltaPrimeBC - vecMeanShuffDeltaPrimeBC) ./ vecSdShuffDeltaPrimeBC;
-			vecZscoreDeltaPrime = (vecDeltaPrime - vecMeanShuffDeltaPrime) ./ vecSdShuffDeltaPrime;
+			vecZscoreTuningRho = (vecTuningRho - vecMeanShuffTuningRho) ./ vecSdShuffTuningRho;
 			vecZscoreOSI = (vecOSI - vecMeanShuffOSI) ./ vecSdShuffOSI;
 			vecZscoreOPI = (vecOPI - vecMeanShuffOPI) ./ vecSdShuffOPI;
 			
 			%get p-values
-			vecPvalueDeltaPrime = 2*normcdf(-abs(vecZscoreDeltaPrime)) < 0.05;
+			vecPvalueDeltaPrimeBC = 2*normcdf(-abs(vecZscoreDeltaPrimeBC)) < 0.05;
+			vecPvalueTuningRho = 2*normcdf(-abs(vecZscoreTuningRho)) < 0.05;
 			vecPvalueOSI = 2*normcdf(-abs(vecZscoreOSI)) < 0.05;
 			vecPvalueOPI = 2*normcdf(-abs(vecZscoreOPI)) < 0.05;
 			
 			%assign means + CI
 			dblAlpha = 1 - 2*normcdf(-1); %one sd
-			[phat,pci] = binofit(sum(vecPvalueDeltaPrime),numel(vecPvalueDeltaPrime),dblAlpha);
+			[phat,pci] = binofit(sum(vecPvalueDeltaPrimeBC),numel(vecPvalueDeltaPrimeBC),dblAlpha);
 			matMeanDeltaPrimeBC(intC,intD,intPop) = phat;
 			matCIDeltaPrimeBC(intC,intD,:,intPop) = pci;
+			dblAlpha = 1 - 2*normcdf(-1); %one sd
+			[phat,pci] = binofit(sum(vecPvalueTuningRho),numel(vecPvalueTuningRho),dblAlpha);
+			matMeanTuningRho(intC,intD,intPop) = phat;
+			matCITuningRho(intC,intD,:,intPop) = pci;
 			[phat,pci] = binofit(sum(vecPvalueOSI),numel(vecPvalueOSI),dblAlpha);
 			matMeanOSI(intC,intD,intPop) = phat;
 			matCIOSI(intC,intD,:,intPop) = pci;
@@ -151,12 +158,14 @@ for intPlot=1:6
 			
 			%% z-scores
 			%assign means
-			matMeanZscoreDeltaPrimeBC(intC,intD,intPop) = nanmean(vecZscoreDeltaPrime);
+			matMeanZscoreDeltaPrimeBC(intC,intD,intPop) = nanmean(vecZscoreDeltaPrimeBC);
+			matMeanZscoreTuningRho(intC,intD,intPop) = nanmean(vecZscoreTuningRho);
 			matMeanZscoreOSI(intC,intD,intPop) = nanmean(vecZscoreOSI);
 			matMeanZscoreOPI(intC,intD,intPop) = nanmean(vecZscoreOPI);
 			
 			%assign stds
-			matSdZscoreDeltaPrimeBC(intC,intD,intPop) = nanstd(vecZscoreDeltaPrime);
+			matSdZscoreDeltaPrimeBC(intC,intD,intPop) = nanstd(vecZscoreDeltaPrimeBC);
+			matSdZscoreTuningRho(intC,intD,intPop) = nanstd(vecZscoreTuningRho);
 			matSdZscoreOSI(intC,intD,intPop) = nanstd(vecZscoreOSI);
 			matSdZscoreOPI(intC,intD,intPop) = nanstd(vecZscoreOPI);
 			end
@@ -165,14 +174,15 @@ for intPlot=1:6
 	
 	%prep
 	intSubPlot=intSubPlot+1;
+	cellLegend = {'\delta''','\rho','OPI','OSI'};
 	vecX = vecHzDiff;
-	matX = repmat(vecX',[1 3]);
-	cellLegend = {'\delta''','OPI','OSI'};
+	matX = repmat(vecX',[1 numel(cellLegend)]);
+	
 	%% plot z-score values
-	matPlotY = cat(1,matMeanZscoreDeltaPrimeBC,matMeanZscoreOPI,matMeanZscoreOSI);
+	matPlotY = cat(1,matMeanZscoreDeltaPrimeBC,matMeanZscoreTuningRho,matMeanZscoreOPI,matMeanZscoreOSI);
 	matPlotY = mean(matPlotY,3)';
 	vecEndVals = matPlotY(end,:);
-	matPlotE = cat(1,matSdZscoreDeltaPrimeBC,matSdZscoreOPI,matSdZscoreOSI);
+	matPlotE = cat(1,matSdZscoreDeltaPrimeBC,matSdZscoreTuningRho,matSdZscoreOPI,matSdZscoreOSI);
 	matPlotE = mean(matPlotE,3)';
 	
 	figure(h1);drawnow;
@@ -193,11 +203,11 @@ for intPlot=1:6
 	end
 	figure(h2);drawnow;
 	matX = matX(1:intMaxHz,:);
-	matPlotY = cat(1,matMeanDeltaPrimeBC,matMeanOPI,matMeanOSI);
+	matPlotY = cat(1,matMeanDeltaPrimeBC,matMeanTuningRho,matMeanOPI,matMeanOSI);
 	matPlotY = mean(matPlotY,3)';
 	matPlotY = matPlotY(1:intMaxHz,:);
-	matPlotE = cat(1,matCIDeltaPrimeBC,matCIOPI,matCIOSI);
-	matPlotE = mean(matPlotE,3);
+	matPlotE = cat(1,matCIDeltaPrimeBC,matCITuningRho,matCIOPI,matCIOSI);
+	matPlotE = mean(matPlotE,4);
 	matPlotE = matPlotE(:,1:intMaxHz,:);
 	matPlotE = bsxfun(@minus,matPlotY,permute(matPlotE,[2 1 3]));
 	matPlotE(:,:,[1 2]) = abs(matPlotE(:,:,[2 1]));
@@ -210,7 +220,6 @@ for intPlot=1:6
 	title(sprintf('%d rep,kappa=%.1f,FWHM=%.3f',vecRep,dblKappa,dblFWHM));
 	fixfig
 	ylim([0 max(get(gca,'ylim'))]);
-	
 end
 
 %% save 1

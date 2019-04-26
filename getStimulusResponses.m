@@ -14,21 +14,22 @@ function [matRespNSR,vecStimTypes,vecUnique] = getStimulusResponses(matResp,vecS
 	%					correspond to the indexed values in vecStimTypes
 	%
 	%	By Jorrit Montijn (Alex Pouget lab), 22-02-18 (dd-mm-yy; Universite de Geneve)
-	
+	%%
 	%neuron x trial
 	intNeurons = size(matResp,1);
 	intTrials = size(matResp,2);
-	[vecStimTypes,vecUnique] = label2idx(vecStimTypeList);
+	[vecStimTypes,vecUnique,vecRepetitions] = label2idx(vecStimTypeList);
 	vecStimTypes = vecStimTypes(:)';
 	intStimTypes = numel(unique(vecStimTypes));
-	intRepetitions = sum(vecStimTypes==vecStimTypes(1));
-	if (intStimTypes * intRepetitions) ~= intTrials
-		error([mfilename ':InconsistentNumberOfRepetitions'],'Number of repetitions is inconsistent');
+	intRepetitions = min(vecRepetitions);
+	if ~all(vecRepetitions==intRepetitions)
+		warning([mfilename ':InconsistentNumberOfRepetitions'],'Number of repetitions is inconsistent');
 	end
 	
 	matRespNSR = nan(intNeurons,intStimTypes,intRepetitions);
 	for intStimType=1:intStimTypes
-		matRespNSR(:,intStimType,:) = matResp(:,vecStimTypes==intStimType);
+		vecTrialsOfType = find(vecStimTypes==intStimType);
+		matRespNSR(:,intStimType,:) = matResp(:,vecTrialsOfType(1:intRepetitions));
 	end
 	
 end

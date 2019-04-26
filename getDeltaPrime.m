@@ -29,23 +29,24 @@ function dblDeltaPrime = getDeltaPrime(vecResp,vecAngles,boolBiasCorrection)
 	for intOri1=1:intNumOri
 		%get resp for ori 1
 		vecRespOri1 = vecResp(:,vecOriIdx==intOri1);
-		dblMu1 = mean(vecRespOri1,2);
-		dblVar1 = var(vecRespOri1,[],2);
+		dblMu1 = nanmean(vecRespOri1,2);
+		dblVar1 = nanvar(vecRespOri1,[],2);
 		dblAng1 = vecUniqueOris(intOri1);
 		for intOri2=(intOri1+1):intNumOri
 			%get resp for ori 1
 			vecRespOri2 = vecResp(:,vecOriIdx==intOri2);
-			dblMu2 = mean(vecRespOri2,2);
-			dblVar2 = var(vecRespOri2,[],2);
+			dblMu2 = nanmean(vecRespOri2,2);
+			dblVar2 = nanvar(vecRespOri2,[],2);
 			dblAng2 = vecUniqueOris(intOri2);
 			dblAngDist = abs(circ_dist(dblAng1,dblAng2));
 			
 			%calc constituents
-			dblDeltaMuNorm = (dblMu2 - dblMu1) / dblAngDist;
+			dblDeltaMuNorm = abs(dblMu2 - dblMu1);% / dblAngDist;
 			dblVarAvg = ((dblVar1 + dblVar2) / 2);
 			
 			%calc delta^2
 			dblDelta2 = (dblDeltaMuNorm.^2) ./ dblVarAvg;
+			%dblDelta2 = (dblDeltaMuNorm) ./ sqrt(dblVarAvg);
 			matDelta2(intOri1,intOri2,:) = dblDelta2;
 			matDelta2(intOri2,intOri1,:) = dblDelta2;
 		end

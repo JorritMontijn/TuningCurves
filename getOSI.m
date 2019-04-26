@@ -16,18 +16,29 @@ function vecOSI = getOSI(matResp,vecTrialAngles)
 	end
 	
 	% prep
+	matResp = matResp - min(matResp,[],2);
 	intN = size(matResp,1);
 	vecOSI = nan(intN,1);
 	[vecAngleIdx,vecUniqueAngles] = label2idx(vecTrialAngles);
+	intStimNum = numel(vecUniqueAngles);
+	
 	%run loop
 	for intN=1:size(matResp,1)
-		vecR = accumarray(vecAngleIdx',matResp(intN,:));
+		vecTrialResp = matResp(intN,:);
+		vecTrialAngleIdx = vecAngleIdx;
+		vecTrialAngleIdx(isnan(vecTrialResp)) = [];
+		vecTrialResp(isnan(vecTrialResp)) = [];
+		vecAngleResp = nan(1,intStimNum);
+		for intStimIdx=1:intStimNum
+			vecAngleResp(intStimIdx) = nanmean(vecTrialResp(vecTrialAngleIdx==intStimIdx));
+		end
+		
 		% get OI
-		[dblPref,intIdx] = max(vecR);
+		[dblPref,intIdx] = max(vecAngleResp);
 		dblPrefAngle = vecUniqueAngles(intIdx);
 		[dblOrthAngle,intOrthIdx] = min(abs(circ_dist(vecUniqueAngles,dblPrefAngle+deg2rad(90))));
 		if intOrthIdx == 0,intOrthIdx=numel(vecUniqueAngles);end
-		vecOSI(intN) = (dblPref - vecR(intOrthIdx)) ./ dblPref;
+		vecOSI(intN) = (dblPref - vecAngleResp(intOrthIdx)) ./ dblPref;
 	end
 	
 end

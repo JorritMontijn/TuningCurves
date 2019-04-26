@@ -1,5 +1,5 @@
 %% set paramaters for data generation
-strFigDir = 'D:\Data\ResultsOriMetricDeltaPrime\';
+strFigDir = 'D:\Data\ResultsOriMetric\';
 intN=100;
 vecRep=3:100;
 vecDistDprime = [0 1 2 3 4];
@@ -31,7 +31,6 @@ for intD=1:numel(vecDistDprime)
 		matTempOI = nan(intN,intRandIters);
 		for intIter=1:intRandIters
 			%% get generated data
-			vecKappa = dblKappa;%rand(1,intN)*1 + 10;
 			matResp = 1 + randn(intN,numel(vecTrialAngles));
 			matResp(:,vecTrialAngles==0) = matResp(:,vecTrialAngles==0) + dblDistDprime;
 			
