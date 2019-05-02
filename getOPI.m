@@ -17,7 +17,7 @@ function vecOPI = getOPI(matResp,vecTrialAngles)
 	end
 	
 	% prep
-	matResp = matResp - min(matResp,[],2);
+	matResp = bsxfun(@minus,matResp,min(matResp,[],2));
 	intN = size(matResp,1);
 	vecOPI = nan(intN,1);
 	[vecAngleIdx,vecUniqueAngles] = label2idx(vecTrialAngles);

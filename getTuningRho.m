@@ -30,7 +30,7 @@ function [vecRho_bc,vecRho,vecP] = getTuningRho(vecResp,vecAngles,boolBiasCorrec
 	dblRangeR = range(vecResp,2);
 	
 	%% calculate
-	vecResp = vecResp - min(vecResp,[],2);
+	vecResp = bsxfun(@minus,vecResp,min(vecResp,[],2));
 	[vecOriIdx,vecUniqueOris] = label2idx(vecAngles);
 	intNumN = size(vecResp,1);
 	intNumOri = max(vecOriIdx);
