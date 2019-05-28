@@ -226,13 +226,13 @@ end
 strOldDir = cd(strFigDir);
 figure(h1);
 drawnow;
-strFig = sprintf('Bootstrapped_z-scores_%s',strDate);
+strFig = sprintf('Bootstrapped_z-scores_%s',getDate);
 export_fig(strcat(strFig,'.tif'));
 print(gcf, '-dpdf', strcat(strFig,'.pdf'));
 %% save 2
 figure(h2);
 drawnow;
-strFig = sprintf('Bootstrapped_significance_%s',strDate);
+strFig = sprintf('Bootstrapped_significance_%s',getDate);
 export_fig(strcat(strFig,'.tif'));
 print(gcf, '-dpdf', strcat(strFig,'.pdf'));
 
