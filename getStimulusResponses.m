@@ -21,7 +21,7 @@ function [matRespNSR,vecStimTypes,vecUnique] = getStimulusResponses(matResp,vecS
 	[vecStimTypes,vecUnique,vecRepetitions] = label2idx(vecStimTypeList);
 	vecStimTypes = vecStimTypes(:)';
 	intStimTypes = numel(unique(vecStimTypes));
-	intRepetitions = min(vecRepetitions);
+	intRepetitions = max(vecRepetitions);
 	if ~all(vecRepetitions==intRepetitions)
 		warning([mfilename ':InconsistentNumberOfRepetitions'],'Number of repetitions is inconsistent');
 	end
@@ -29,7 +29,7 @@ function [matRespNSR,vecStimTypes,vecUnique] = getStimulusResponses(matResp,vecS
 	matRespNSR = nan(intNeurons,intStimTypes,intRepetitions);
 	for intStimType=1:intStimTypes
 		vecTrialsOfType = find(vecStimTypes==intStimType);
-		matRespNSR(:,intStimType,:) = matResp(:,vecTrialsOfType(1:intRepetitions));
+		matRespNSR(:,intStimType,1:numel(vecTrialsOfType)) = matResp(:,vecTrialsOfType);
 	end
 	
 end

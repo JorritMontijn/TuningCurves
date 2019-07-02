@@ -71,8 +71,8 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		
 		%get responses
 		vecResp = matResp(intNeuron,:);
-		vecMeanRespPerOri = xmean(matRespNSR(intNeuron,:,:),3);
-		vecSDRespPerOri = xstd(matRespNSR(intNeuron,:,:),3);
+		vecMeanRespPerOri = nanmean(matRespNSR(intNeuron,:,:),3);
+		vecSDRespPerOri = nanstd(matRespNSR(intNeuron,:,:),[],3);
 		
 		%build initial parameter vector
 		dblPrefOri = mod(circ_mean(vecUniqueRads(:),vecMeanRespPerOri(:)),2*pi);
@@ -115,5 +115,6 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	sOut.matFittedResp = matFittedResp;
 	sOut.matVariance = matVariance;
 	sOut.matBandwidth = matBandwidth;
+	sOut.funcFit = funcFit;
 end
 
