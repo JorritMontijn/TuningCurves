@@ -1,7 +1,7 @@
 %% set paramaters for data generation
 strFigDir = 'D:\Data\ResultsOriMetric\';
 intN=100;
-
+close all
 vecHzDiff = [0:20];
 vecUniqueAngles = deg2rad(0:45:359);
 intRandIters = 1;
@@ -125,9 +125,9 @@ for intPlot=1:4
 	intD = 1;
 	vecX = vecHzDiff;
 	matX = repmat(vecX',[1 3]);
-	matPlotY = cat(1,matMeanDeltaPrimeBC,matMeanICV,matMeanOI)';
-	matPlotE = cat(1,matSdDeltaPrimeBC,matSdICV,matSdOI)';
-	cellLegend = {'\delta''_b_c','OPI','OSI'};
+	matPlotY = cat(1,matMeanDeltaPrime,matMeanICV,matMeanOI)';
+	matPlotE = cat(1,matSdDeltaPrime,matSdICV,matSdOI)';
+	cellLegend = {'\delta''','OPI','OSI'};
 	
 	subplot(2,2,intSubPlot)
 	errorfill(matX,matPlotY,matPlotE);
@@ -139,10 +139,10 @@ for intPlot=1:4
 	ylim([0 max(get(gca,'ylim'))]);
 	
 	%% plot normalized
-	matPlotY = cat(1,matMeanDeltaPrimeBC,matMeanICV,matMeanOI)';
+	matPlotY = cat(1,matMeanDeltaPrime,matMeanICV,matMeanOI)';
 	vecEndVals = matPlotY(end,:);
 	matPlotY = bsxfun(@rdivide,matPlotY,vecEndVals);
-	matPlotE = cat(1,matSdDeltaPrimeBC,matSdICV,matSdOI)';
+	matPlotE = cat(1,matSdDeltaPrime,matSdICV,matSdOI)';
 	matPlotE = bsxfun(@rdivide,matPlotE,vecEndVals);
 	
 	figure(h2);drawnow;

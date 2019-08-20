@@ -18,19 +18,19 @@ for intPlot=1:4
 	% set params
 	if intPlot == 1
 		vecRep=100;
-		dblKappa=25;%9.106;1;25
+		dblKappa=10;%9.106;1;25
 	elseif intPlot == 2
 		vecRep=100;
 		dblKappa=1;%9.106;1;25
 	elseif intPlot == 3
 		vecRep=20;
-		dblKappa=25;%9.106;1;25
+		dblKappa=10;%9.106;1;25
 	elseif intPlot == 4
 		vecRep=20;
 		dblKappa=1;%9.106;1;25
 		
 	end
-	dblFWHM = rad2deg(2*acos(1- [(1/dblKappa) * log(2)])); %45 degs for kappa=9.106
+	dblFWHM = rad2deg(2*acos(1- [(1/dblKappa) * log(2)]))/2; %45 degs for kappa=9.106
 	
 	% pre-allocate
 	matMeanGammaShape = nan([numel(vecRep) numel(vecHzDiff)]);
@@ -84,7 +84,7 @@ for intPlot=1:4
 	ylabel('Ori. selectivity')
 	title(sprintf('%d repetitions, kappa=%.1f, FWHM=%.3f',vecRep,dblKappa,dblFWHM));
 	fixfig
-	ylim([0 max(get(gca,'ylim'))]);
+	%ylim([0 max(get(gca,'ylim'))]);
 	
 end
 return

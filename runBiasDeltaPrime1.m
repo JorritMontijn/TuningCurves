@@ -31,8 +31,8 @@ for intD=1:numel(vecDistDprime)
 		matTempOI = nan(intN,intRandIters);
 		for intIter=1:intRandIters
 			%% get generated data
-			matResp = 1 + randn(intN,numel(vecTrialAngles));
-			matResp(:,vecTrialAngles==0) = matResp(:,vecTrialAngles==0) + dblDistDprime;
+			matResp = 2 + randn(intN,numel(vecTrialAngles));
+			matResp(:,vecTrialAngles==0) = matResp(:,vecTrialAngles==0) + dblDistDprime/range(vecUniqueAngles);
 			
 			%% get bias-corrected delta prime
 			matTempDeltaPrimeBC(:,intIter) = getDeltaPrime(matResp,vecTrialAngles,true);

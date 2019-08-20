@@ -1,5 +1,5 @@
 %% set paramaters for data generation
-intN=100;
+intN=10;
 vecRep=3:100;
 vecDistDprime = 5*[0 1 2 3 4];
 vecUniqueAngles = deg2rad(0:20:359);
