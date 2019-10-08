@@ -1,4 +1,4 @@
-function vecOPI = getOPI(matResp,vecTrialAngles)
+function [vecOPI,vecAngleResp] = getOPI(matResp,vecTrialAngles)
 	%getOPI Calculates the orientation precision index (Ringach)
 	%	 vecOPI = getOPI(matResp,vecTrialAngles)
 	%
@@ -20,7 +20,8 @@ function vecOPI = getOPI(matResp,vecTrialAngles)
 	matResp = bsxfun(@minus,matResp,min(matResp,[],2));
 	intN = size(matResp,1);
 	vecOPI = nan(intN,1);
-	[vecAngleIdx,vecUniqueAngles] = label2idx(vecTrialAngles);
+	vecAngleIdx = label2idx(vecTrialAngles);
+	vecUniqueAngles = unique(vecTrialAngles);
 	intStimNum = numel(vecUniqueAngles);
 	
 	%run loop

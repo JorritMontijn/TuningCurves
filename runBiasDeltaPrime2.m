@@ -1,11 +1,11 @@
 %% set paramaters for data generation
 strFigDir = 'D:\Data\ResultsOriMetric\';
-intN=100;
-vecRep=3:100;
-vecDistDprime = 5*[0 1 2 3 4];
+intN=10;
+vecRep=10;%3:100;
+vecDistDprime = 0;%5*[0 1 2 3 4];
 vecUniqueAngles = deg2rad(0:45:359);
 intRandIters = 1;
-dblKappa=1;%9.106;1;25
+dblKappa=25;%9.106;1;25
 dblFWHM = rad2deg(2*acos(1- [(1/dblKappa) * log(2)])); %45 degs for kappa=9.106
 
 % pre-allocate

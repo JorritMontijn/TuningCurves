@@ -1,4 +1,4 @@
-function vecOSI = getOSI(matResp,vecTrialAngles)
+function [vecOSI,vecAngleResp,intIdx,intOrthIdx] = getOSI(matResp,vecTrialAngles)
 	%getOSI Calculates the orientation selectivity index
 	%	 vecOSI = getOSI(matResp,vecTrialAngles)
 	%
