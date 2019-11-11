@@ -1,4 +1,4 @@
-function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,vecTrialStarts,dblBaseRate,dblPrefRate,dblKappa,boolDoublePeaked)
+function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblKappa,boolDoublePeaked,dblPrefOri)
 	%getGeneratedData Generates neural data using von Mises tuning curves
 	%    matResp = getGeneratedSpikingData(intN,intRep,dblKappa,dblDistDprime)
 	%
@@ -18,9 +18,9 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,vec
 	if ~exist('boolDoublePeaked','var') || isempty(boolDoublePeaked)
 		boolDoublePeaked = false;
 	end
-	vecStarts = vecTrialStarts(:,1);
-	if size(vecTrialStarts,2) == 2
-		vecStops = vecTrialStarts(:,2);
+	vecStarts = matTrialT(:,1);
+	if size(matTrialT,2) == 2
+		vecStops = matTrialT(:,2);
 	else
 		vecStops = vecStarts + median(diff(vecStarts));
 	end
@@ -28,7 +28,9 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,vec
 	vecBaseDurs = vecStarts(2:end) -  vecStops(1:(end-1));
 	vecBaseDurs(end+1) = median(vecBaseDurs);
 	%% generate preferred orientations
-	dblPrefOri = rand(1)*2*pi;
+	if ~exist('dblPrefOri','var') || isempty(dblPrefOri)
+		dblPrefOri = rand(1)*2*pi;
+	end
 	intTrials = numel(vecTrialAngles);
 	
 	%get mean tuning curve
@@ -38,9 +40,13 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,vec
 	end
 	
 	%normalize
-	vecMeanR = vecMeanR-min(vecMeanR);
-	vecMeanR = vecMeanR ./ max(vecMeanR);
-	vecMeanR = vecMeanR*(dblPrefRate-dblBaseRate) + dblBaseRate;
+	if range(vecMeanR) == 0
+		vecMeanR(:) = dblPrefRate;
+	else
+		vecMeanR = vecMeanR-min(vecMeanR);
+		vecMeanR = vecMeanR ./ max(vecMeanR);
+		vecMeanR = vecMeanR*(dblPrefRate-dblBaseRate) + dblBaseRate;
+	end
 	
 	%generate leading baseline
 	vecITI = exprnd(1/dblBaseRate,[1 round(dblBaseRate*vecStarts(1)*10)]);
