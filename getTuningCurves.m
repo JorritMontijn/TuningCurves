@@ -33,7 +33,9 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	%vecStimOriDegrees =  vecTrialOris;
 	
 	%% check ori or dir
-	if range(vecStimOriDegrees) > 180 %direction, full circle
+	if range(vecStimOriDegrees) < (2*pi)
+		warning([mfilename ':PossiblyRadians'],sprintf('Range of angles is %d degrees, are you sure you are not supplying radians?',range(vecStimOriDegrees)));
+	elseif range(vecStimOriDegrees) > 180 %direction, full circle
 		intParams = 5;
 		vecKappa = [1 1];
 		indKappa = logical([0 1 1 0 0]);
@@ -58,6 +60,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	matFittedResp = nan(intNeurons,numel(vecUniqueRads));
 	matVariance = nan(intNeurons,numel(vecKappa));
 	matBandwidth = nan(intNeurons,numel(vecKappa));
+	vecOriTtest = nan(intNeurons,1);
 	sOptions = curvefitoptimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
 	hTic = tic;
 	
@@ -73,6 +76,18 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		vecResp = matResp(intNeuron,:);
 		vecMeanRespPerOri = nanmean(matRespNSR(intNeuron,:,:),3);
 		vecSDRespPerOri = nanstd(matRespNSR(intNeuron,:,:),[],3);
+		
+		%FDR-corrected t-tests
+		matR = squeeze(matRespNSR(intNeuron,:,:));
+		matP = nan(numel(vecUniqueRads),numel(vecUniqueRads));
+		for intOri=1:numel(vecUniqueRads)
+			[dummy,vecP] = ttest2(repmat(matR(intOri,:),[numel(vecUniqueRads) 1])',matR');
+			matP(intOri,:) = vecP;
+		end
+		vecAllPs = matP(tril(true(numel(vecUniqueRads)),-1));
+		[dummy,dummy2,vecCorrP] = fdr_bh(vecAllPs);
+		dblMinOriP_bh = min(vecCorrP);
+		vecOriTtest(intNeuron) = dblMinOriP_bh;
 		
 		%build initial parameter vector
 		dblPrefOri = mod(circ_mean(vecUniqueRads(:),vecMeanRespPerOri(:)),2*pi);
@@ -91,6 +106,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		matBandwidth(intNeuron,:) = 2*acos(1-((1./matFittedParams(intNeuron,indKappa))*log(2)));%FWHM=2*arccos(1- [(1/kappa) * ln(2)] )
 		matMeanResp(intNeuron,:) = vecMeanRespPerOri;
 		matSDResp(intNeuron,:) = vecSDRespPerOri;
+		
 		
 		if boolPlot
 			cla;
@@ -116,5 +132,6 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	sOut.matVariance = matVariance;
 	sOut.matBandwidth = matBandwidth;
 	sOut.funcFit = funcFit;
+	sOut.vecOriTtest = vecOriTtest;
 end
 
