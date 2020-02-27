@@ -13,16 +13,17 @@ function cellSelect = getSelectionVectors(structStim,sTypes)
 	%	Version history:
 	%	1.0 - July 22 2013
 	%	Created by Jorrit Montijn
-	
-	%get trials
-	cellFields = fieldnames(structStim);
-	intPresentations = length(structStim.(cellFields{1}));
-	indBase = true(1,intPresentations);
+	%	1.1 - Feb 18 2020
+	%	Trial selection from sTypes [by JM]
 	
 	%retrieve data from input structure
 	matTypes = sTypes.matTypes;
 	cellNames = sTypes.cellNames;
-	
+
+	%get trials
+	intPresentations = length(structStim.(cellNames{1}));
+	indBase = true(1,intPresentations);
+		
 	%loop through unique stimuli to create indexing vectors
 	[intProperties,intStimuli] = size(matTypes);
 	cellSelect = cell(1,intStimuli);
