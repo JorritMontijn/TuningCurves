@@ -1,4 +1,4 @@
-function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
+function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	%getTuningCurves Get tuning curves for neurons using von Mises fit.
 	%Syntax:
 	%[sOut] = getTuningCurves(matResp,vecStimOriDegrees)
@@ -28,7 +28,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	%	By Jorrit Montijn (Alex Pouget lab), 22-02-18 (dd-mm-yy; Universite de Geneve)
 	
 	%% header
-	boolPlot=false;
+	if ~exist('boolPlot','var') || isempty(boolPlot),boolPlot=false;end
 	matResp = double(matResp);
 	%vecStimOriDegrees =  vecTrialOris;
 	
@@ -53,6 +53,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	vecUniqueRads =  ang2rad(vecUniqueDegs);
 	
 	%% pre-allocate output
+	intStimTypes = size(matRespNSR,2);
 	intNeurons = size(matResp,1);
 	matFittedParams = nan(intNeurons,intParams);
 	matMeanResp = nan(intNeurons,numel(vecUniqueRads));
@@ -61,6 +62,12 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	matVariance = nan(intNeurons,numel(vecKappa));
 	matBandwidth = nan(intNeurons,numel(vecKappa));
 	vecOriTtest = nan(intNeurons,1);
+	intTests = (intStimTypes*(intStimTypes-1))/2;
+	matOriTtest = nan(intNeurons,intTests);
+	vecFitR2 = nan(intNeurons,1);
+	vecFitT = nan(intNeurons,1);
+	vecFitP = nan(intNeurons,1);
+		
 	sOptions = curvefitoptimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
 	hTic = tic;
 	
@@ -88,6 +95,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		[dummy,dummy2,vecCorrP] = fdr_bh(vecAllPs);
 		dblMinOriP_bh = min(vecCorrP);
 		vecOriTtest(intNeuron) = dblMinOriP_bh;
+		matOriTtest(intNeuron,:) = vecAllPs;
 		
 		%build initial parameter vector
 		dblPrefOri = mod(circ_mean(vecUniqueRads(:),vecMeanRespPerOri(:)),2*pi);
@@ -101,6 +109,16 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		catch
 			matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
 		end
+		
+		%get R^2
+		vecFitR = feval(funcFit,matFittedParams(intNeuron,:),vecStimOriRads);
+		%[dblR2,dblSS_tot,dblSS_res] = getR2(vecResp,vecFitR);
+		[dblR2,dblSS_tot,dblSS_res,dblT,dblP] = getR2(vecResp,vecFitR,numel(vecP0));
+		vecFitR2(intNeuron) = dblR2;
+		vecFitT(intNeuron) = dblT;
+		vecFitP(intNeuron) = dblP;
+		
+		%save output
 		matFittedResp(intNeuron,:) = feval(funcFit,matFittedParams(intNeuron,:),vecUniqueRads);
 		matVariance(intNeuron,:) = 1 - (besseli(1,matFittedParams(intNeuron,indKappa)) ./ besseli(0,matFittedParams(intNeuron,indKappa))); %var=1-I1(k)/I0(k)
 		matBandwidth(intNeuron,:) = 2*acos(1-((1./matFittedParams(intNeuron,indKappa))*log(2)));%FWHM=2*arccos(1- [(1/kappa) * ln(2)] )
@@ -110,10 +128,11 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 		
 		if boolPlot
 			cla;
-			errorbar(vecUniqueRads,vecMeanRespPerOri,vecSDRespPerOri./sqrt(size(matRespNSR,3)));
+			errorbar(rad2deg(vecUniqueRads),vecMeanRespPerOri,vecSDRespPerOri./sqrt(size(matRespNSR,3)));
 			hold on
-			plot(vecUniqueRads,matFittedResp(intNeuron,:));
+			plot(rad2deg(vecUniqueRads),matFittedResp(intNeuron,:));
 			hold off
+			title(sprintf('Pref deg=%.1f, R^2=%.3f,t=%.3f,p=%.2e',rad2deg(matFittedParams(intNeuron,1)),dblR2,dblT,dblP));
 			drawnow
 			pause
 		end
@@ -133,5 +152,10 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees)
 	sOut.matBandwidth = matBandwidth;
 	sOut.funcFit = funcFit;
 	sOut.vecOriTtest = vecOriTtest;
+	sOut.matOriTtest = matOriTtest;
+	sOut.vecFitR2 = vecFitR2;
+	sOut.vecFitT = vecFitT;
+	sOut.vecFitP = vecFitP;
+	
 end
 

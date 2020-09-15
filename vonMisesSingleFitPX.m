@@ -16,5 +16,5 @@ function yOut = vonMisesSingleFitPX(params,xList)
 	
 	[y x] = circ_vmpdf(xList, prefDir, kappa);
 	
-	yOut = gain*y+baseline;
+	yOut = gain*reshape(y,size(xList))+baseline;
 end
