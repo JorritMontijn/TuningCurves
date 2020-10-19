@@ -37,6 +37,7 @@ function matResp = getRespMat(ses,vecNeurons,vecStims,structParams)
 		%pre-stimulus baseline
 		vecStartFrames = [round(ses.samplingFreq*3) ses.structStim.FrameOff(1:(end-1))];
 		vecStopFrames = ses.structStim.FrameOn;
+		vecStartFrames = round(max((vecStartFrames + vecStopFrames)/2,vecStartFrames-25));
 	else
 		%stimuli
 		vecStartFrames = ses.structStim.FrameOn(vecStims);
