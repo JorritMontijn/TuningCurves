@@ -134,7 +134,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 			hold off
 			title(sprintf('Pref deg=%.1f, R^2=%.3f,t=%.3f,p=%.2e',rad2deg(matFittedParams(intNeuron,1)),dblR2,dblT,dblP));
 			drawnow
-			pause
+			%pause
 		end
 	end
 	

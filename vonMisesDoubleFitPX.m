@@ -19,6 +19,6 @@ function yOut = vonMisesDoubleFitPX(params,xList)
 	[y1 x] = circ_vmpdf(xList, prefDir, kappa);
 	[y2 x] = circ_vmpdf(xList, (prefDir+pi), kappa);
 	
-	yOut = gain*(y1+dirIdx*y2)+baseline;
+	yOut = reshape(gain*(y1+dirIdx*y2)+baseline,size(xList));
 end
 
