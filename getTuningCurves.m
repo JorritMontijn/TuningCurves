@@ -68,7 +68,11 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	vecFitT = nan(intNeurons,1);
 	vecFitP = nan(intNeurons,1);
 		
-	sOptions = curvefitoptimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
+	try
+		sOptions = optimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
+	catch
+		sOptions = curvefitoptimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
+	end
 	hTic = tic;
 	
 	%% run neuron loop
