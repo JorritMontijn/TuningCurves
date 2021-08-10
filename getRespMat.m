@@ -1,90 +1,75 @@
-function matResp = getRespMat(ses,vecNeurons,vecStims,structParams)
-	%getNeuronResponse Retrieves neuronal response for certain stimuli
-	%	Syntax: matResp = getNeuronResponse(ses,vecNeurons,vecStims)
+function [matTE,vecWindowBinCenters] = getRespMat(vecTime,vecVals,vecEvents,vecWindow)
+	%getRespMat Retrieves [time x event] matrix
+	%	Syntax: matTE = getRespMat(vecTime,vecVals,vecEvents,vecWindow)
 	%   Input:
-	%	- ses, session data
-	%	- vecNeurons, vector of which neurons to include
-	%	- vecStims, vector of which stimuli to include [-1 returns response
-	%		outside stimulus presentations]; works well with cellSelect{}
-	%		output vector (output from getSelectionVectors)
-	%	Output: 
-	%	- matResp, 2D matrix containing neuronal response per stimulus per neuron:
-	%		matResp(intNeuron,intStimPres)
+	%	- vecTime, vector of time stamps
+	%	- vecVals, vector of values
+	%	- vecEvents, vector of event times
+	%	- vecWindow, 2-element vector specifying start and stop times;
+	%					or vector with bin edges
+	%	Output:
+	%	- matTE, 2D matrix containing binned value per time point per event:
+	%		matTE(intTimeBin,intEvent)
+	%	- vecWindowBinCenters, vector containing timestamps per bin
 	%
 	%	Version history:
-	%	1.0 - July 22 2013
+	%	1.0 - 2021 August 10
 	%	Created by Jorrit Montijn
-	%	2.0 - May 19 2014
-	%	Added support for preceding baseline subtraction [by JM]
 	
-	%check inputs
-	if nargin < 4
-		structParams = struct;
-	end
-	if nargin < 3 || isempty(vecStims)
-		vecStims = 1:length(ses.structStim.FrameOff);
-	end
-	if nargin < 2 || isempty(vecNeurons)
-		vecNeurons = 1:numel(ses.neuron);
+	%% input is trace
+	%get window
+	if ~exist('vecWindow','var') || isempty(vecWindow)
+		vecWindow = [-1 3];
 	end
 	
-	%select frames
-	if vecStims == -1
-		%post-stimulus baseline
-		vecStartFrames = ses.structStim.FrameOff;
-		vecStopFrames = [ses.structStim.FrameOn(2:end) length(ses.neuron(1).dFoF)];
-	elseif vecStims == -2
-		%pre-stimulus baseline
-		vecStartFrames = [round(ses.samplingFreq*3) ses.structStim.FrameOff(1:(end-1))];
-		vecStopFrames = ses.structStim.FrameOn;
-		vecStartFrames = round(max((vecStartFrames + vecStopFrames)/2,vecStartFrames-25));
+	%get event times
+	intEvents = numel(vecEvents);
+	vecEventStarts = min(vecWindow) + vecEvents;
+	vecEventStops = max(vecWindow) + vecEvents;
+	
+	if numel(vecWindow) == 2
+		%get window variables
+		intWindowSize = 1 + find(vecTime >= vecEventStops(2),1) - find(vecTime >= vecEventStarts(2),1);
+		vecWindowBinCenters = (0:(intWindowSize-1))/(intWindowSize-1);
+		vecWindowBinCenters = (vecWindowBinCenters * range(vecWindow)) + vecWindow(1);
 	else
-		%stimuli
-		vecStartFrames = ses.structStim.FrameOn(vecStims);
-		vecStopFrames = ses.structStim.FrameOff(vecStims);
+		vecWindowBinCenters = vecWindow(1:(end-1)) + diff(vecWindow)/2;
 	end
 	
-	%check if frame subset selection is requested
-	if isfield(structParams,'intStopOffset')
-		vecStopFrames = vecStartFrames + structParams.intStopOffset;
-	end
-	if isfield(structParams,'intStartOffset')
-		vecStartFrames = vecStartFrames + structParams.intStartOffset;
-	end
-	if isfield(structParams,'intPreBaselineRemoval')
-		intPreBaselineRemoval = structParams.intPreBaselineRemoval;%dblBaselineSecs
-	else
-		intPreBaselineRemoval = [];
-	end
-	
-	%retrieve data
-	if islogical(vecStims)
-		intRepetitions = sum(vecStims);
-	else
-		intRepetitions = numel(vecStims);
-	end
-	%check if vector or scalar
-	boolVec = length(vecNeurons) > 1;
-	if boolVec
-		if size(vecNeurons,2) == 1,vecNeurons = vecNeurons';end
-		matResp = nan(max(vecNeurons),intRepetitions);
-	else matResp = nan(1,intRepetitions);
-	end
-	
-	%go through stims
-	for intStimPres=1:length(vecStartFrames)
-		intStartFrame = vecStartFrames(intStimPres);
-		intStopFrame = vecStopFrames(intStimPres);
-		if boolVec
-			for intNeuron=vecNeurons
-				if ~isempty(intPreBaselineRemoval),dblBaseline = mean(ses.neuron(intNeuron).dFoF((intStartFrame-intPreBaselineRemoval):(intStartFrame-1)));
-				else dblBaseline = 0;end
-				matResp(intNeuron,intStimPres) = mean(ses.neuron(intNeuron).dFoF(intStartFrame:intStopFrame))-dblBaseline;
-			end; 
+	%use simple trial loop
+	intWindowSize = numel(vecWindowBinCenters);
+	matTE = nan(intEvents,intWindowSize);
+	for intEvent=1:intEvents
+		if numel(vecWindow) == 2
+			%retrieve target entries
+			vecAssignPoints = 1:intWindowSize;
+			intStart = find(vecTime >= vecEventStarts(intEvent),1);
+			intStop = find(vecTime >= vecEventStops(intEvent),1);
+			if isempty(intStop) %out-of-bounds at end
+				intStop=numel(vecTime);
+				vecUsePoints = intStart:intStop;
+				vecAssignPoints((numel(vecUsePoints)+1):end) = []; %remove out-of-bounds entries
+			end
+			if intStart == 1 %out-of-bounds at start
+				vecUsePoints = intStart:intStop;
+				intDeleteUpTo = numel(vecAssignPoints)-numel(vecUsePoints);
+				if intDeleteUpTo>0
+					vecAssignPoints(1:intDeleteUpTo) = []; %remove out-of-bounds entries
+				end
+			end
+			
+			%assign data to matrix
+			vecUsePoints = intStart:intStop;
+			if numel(vecAssignPoints) > numel(vecUsePoints)
+				vecAssignPoints = vecAssignPoints(1:numel(vecUsePoints));
+			elseif numel(vecAssignPoints) < numel(vecUsePoints)
+				vecUsePoints = vecUsePoints(1:numel(vecAssignPoints));
+			end
+			matTE(intEvent,vecAssignPoints) = vecVals(vecUsePoints);
 		else
-			if ~isempty(intPreBaselineRemoval),dblBaseline = mean(ses.neuron(vecNeurons).dFoF((intStartFrame-intPreBaselineRemoval):(intStartFrame-1)));
-			else dblBaseline = 0;end
-			matResp(1,intStimPres) = mean(ses.neuron(vecNeurons).dFoF(intStartFrame:intStopFrame)) - dblBaseline;
+			vecTheseEdgesT = vecEvents(intEvent) + vecWindow;
+			[vecCounts,vecMeans] = makeBins(vecTime,vecVals,vecTheseEdgesT);
+			matTE(intEvent,:) = vecMeans;
 		end
 	end
 end
