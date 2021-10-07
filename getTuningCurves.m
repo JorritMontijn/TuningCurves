@@ -47,6 +47,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 		funcFit = @vonMisesSingleFitPX;
 		vecStimOriDegrees = vecStimOriDegrees*2;
 	end
+	vecStimOriDegrees = vecStimOriDegrees(:)';
 	%get stimulus response by repetition; from [N x T] to [N x S x R]
 	[matRespNSR,vecStimTypes,vecUniqueDegs] = getStimulusResponses(matResp,vecStimOriDegrees);
 	vecStimOriRads = ang2rad(vecStimOriDegrees);
