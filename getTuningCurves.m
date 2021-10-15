@@ -62,9 +62,8 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	matFittedResp = nan(intNeurons,numel(vecUniqueRads));
 	matVariance = nan(intNeurons,numel(vecKappa));
 	matBandwidth = nan(intNeurons,numel(vecKappa));
-	vecOriTtest = nan(intNeurons,1);
+	vecOriAnova = nan(intNeurons,1);
 	intTests = (intStimTypes*(intStimTypes-1))/2;
-	matOriTtest = nan(intNeurons,intTests);
 	vecFitR2 = nan(intNeurons,1);
 	vecFitT = nan(intNeurons,1);
 	vecFitP = nan(intNeurons,1);
@@ -89,18 +88,17 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 		vecMeanRespPerOri = nanmean(matRespNSR(intNeuron,:,:),3);
 		vecSDRespPerOri = nanstd(matRespNSR(intNeuron,:,:),[],3);
 		
-		%FDR-corrected t-tests
+		%anova over orientations
 		matR = squeeze(matRespNSR(intNeuron,:,:));
-		matP = nan(numel(vecUniqueRads),numel(vecUniqueRads));
-		for intOri=1:numel(vecUniqueRads)
-			[dummy,vecP] = ttest2(repmat(matR(intOri,:),[numel(vecUniqueRads) 1])',matR');
-			matP(intOri,:) = vecP;
-		end
-		vecAllPs = matP(tril(true(numel(vecUniqueRads)),-1));
-		[dummy,dummy2,vecCorrP] = fdr_bh(vecAllPs);
-		dblMinOriP_bh = min(vecCorrP);
-		vecOriTtest(intNeuron) = dblMinOriP_bh;
-		matOriTtest(intNeuron,:) = vecAllPs;
+		vecR = matR(:);
+		matG = repmat((1:intStimTypes)',[1 size(matR,2)]);
+		vecG = matG(:);
+		indRem = isnan(vecR);
+		vecR(indRem) = [];
+		vecG(indRem) = [];
+		dblP_Anova = anova1(vecR,vecG,'off');
+		vecOriAnova(intNeuron) = dblP_Anova;
+		
 		
 		%build initial parameter vector
 		dblPrefOri = mod(circ_mean(vecUniqueRads(:),vecMeanRespPerOri(:)),2*pi);
@@ -156,8 +154,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	sOut.matVariance = matVariance;
 	sOut.matBandwidth = matBandwidth;
 	sOut.funcFit = funcFit;
-	sOut.vecOriTtest = vecOriTtest;
-	sOut.matOriTtest = matOriTtest;
+	sOut.vecOriAnova = vecOriAnova;
 	sOut.vecFitR2 = vecFitR2;
 	sOut.vecFitT = vecFitT;
 	sOut.vecFitP = vecFitP;
