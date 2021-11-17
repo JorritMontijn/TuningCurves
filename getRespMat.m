@@ -21,6 +21,9 @@ function [matTE,vecWindowBinCenters] = getRespMat(vecTime,vecVals,vecEvents,vecW
 	if ~exist('vecWindow','var') || isempty(vecWindow)
 		vecWindow = [-1 3];
 	end
+	if numel(vecTime) ~= numel(vecVals)
+		error([mfilename ':SizeMismatch'],'Size of time and value vectors are not identical');
+	end
 	
 	%get event times
 	intEvents = numel(vecEvents);
