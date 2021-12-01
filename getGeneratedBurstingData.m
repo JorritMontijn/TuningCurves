@@ -1,4 +1,4 @@
-function [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialAngles,matTrialT,sSpikingParams,sTuningParams)
+function [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialRadians,matTrialT,sSpikingParams,sTuningParams)
 	%getGeneratedBurstingData Generates neural data using von Mises tuning curves
 	%   [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialAngles,matTrialT,sSpikingParams,sTuningParams)
 	%
@@ -10,15 +10,15 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialAngles,ma
 
 	%% check inputs
 	if ~exist('matTrialT','var') || isempty(matTrialT)
-		if ~exist('vecTrialAngles','var') || isempty(vecTrialAngles)
+		if ~exist('vecTrialAngles','var') || isempty(vecTrialRadians)
 			vecUniqueTrialAngles = 0:(360/24):359;
-			vecTrialAngles = [];
+			vecTrialRadians = [];
 			for intRep=1:10
-				vecTrialAngles = cat(2,vecTrialAngles,vecUniqueTrialAngles(randperm(numel(vecUniqueTrialAngles))));
+				vecTrialRadians = cat(2,vecTrialRadians,vecUniqueTrialAngles(randperm(numel(vecUniqueTrialAngles))));
 			end
-			vecTrialAngles = deg2rad(vecTrialAngles);
+			vecTrialRadians = deg2rad(vecTrialRadians);
 		end
-		intT = numel(vecTrialAngles);
+		intT = numel(vecTrialRadians);
 		dblDur = 1;
 		dblITI = 0.5;
 		dblPreLead=1;
@@ -61,12 +61,12 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialAngles,ma
 	if ~exist('dblPrefOri','var') || isempty(dblPrefOri)
 		dblPrefOri = rand(1)*2*pi;
 	end
-	intTrials = numel(vecTrialAngles);
+	intTrials = numel(vecTrialRadians);
 	
 	%get mean tuning curve
-	vecMeanR = circ_vmpdf(vecTrialAngles, dblPrefOri, dblKappa);
+	vecMeanR = circ_vmpdf(vecTrialRadians, dblPrefOri, dblKappa);
 	if boolDoublePeaked
-		vecMeanR = vecMeanR + circ_vmpdf(vecTrialAngles, dblPrefOri+deg2rad(180), dblKappa);
+		vecMeanR = vecMeanR + circ_vmpdf(vecTrialRadians, dblPrefOri+deg2rad(180), dblKappa);
 	end
 	
 	%bursts
