@@ -83,9 +83,9 @@ function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSam
 	vecF = 1 + vecTransientF + normrnd(0,dblNoise,size(vecTransientF));
 	
 	%transform to dF/F0
-	[vecdFoF,vecF,vecF0] = calcdFoF(vecF, dblSamplingFreq);
+	[vecdFoF,vecF,vecF0] = calcLocaldFoF(vecF, dblSamplingFreq);
 end
-function [vecdFoF,vecF,vecF0] = calcdFoF(vecF, dblSamplingFreq,boolSmooth)
+function [vecdFoF,vecF,vecF0] = calcLocaldFoF(vecF, dblSamplingFreq,boolSmooth)
 	%set parameters
 	dblFraction=0.5;
 	dblSecWindowSize=30;

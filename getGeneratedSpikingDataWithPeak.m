@@ -1,6 +1,6 @@
-function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri)
-	%getGeneratedData Generates neural data using von Mises tuning curves
-	%    matResp = getGeneratedSpikingData(intN,intRep,dblKappa,dblDistDprime)
+function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri,intAddSpikes)
+	%getGeneratedSpikingDataWithPeak Generates neural data using von Mises tuning curves
+	%   [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri,intAddSpikes)
 	%
 	%
 	%Version History:
@@ -15,9 +15,17 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAn
 	%boolDoublePeaked
 	
 	
+	if ~exist('dblPrefOri','var') || isempty(dblPrefOri)
+		dblPrefOri = rand(1)*2*pi;
+	end
 	if ~exist('boolDoublePeaked','var') || isempty(boolDoublePeaked)
 		boolDoublePeaked = false;
 	end
+	if ~exist('intAddSpikes','var') || isempty(intAddSpikes)
+		intAddSpikes = round(numel(matTrialT(:,1))/2);
+	end
+	
+	%% get timings
 	vecStarts = matTrialT(:,1);
 	if size(matTrialT,2) == 2
 		vecStops = matTrialT(:,2);
@@ -28,9 +36,7 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAn
 	vecBaseDurs = vecStarts(2:end) -  vecStops(1:(end-1));
 	vecBaseDurs(end+1) = median(vecBaseDurs);
 	%% generate preferred orientations
-	if ~exist('dblPrefOri','var') || isempty(dblPrefOri)
-		dblPrefOri = rand(1)*2*pi;
-	end
+	
 	intTrials = numel(vecTrialAngles);
 	
 	%get mean tuning curve
@@ -51,7 +57,7 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAn
 	%generate peak response
 	dblStartDelay = 0.1;
 	vecTrialStarts = vecStarts(:)+dblStartDelay;
-	vecChooseTrials = randperm(numel(vecStarts),round(numel(vecStarts)/2));
+	vecChooseTrials = randperm(numel(vecStarts),intAddSpikes);
 	%vecJitteredSpikes = (rand(size(vecChooseTrials))*0.002-0.001)*dblJitter;
 	vecJitteredSpikes = 0.001*randn(size(vecChooseTrials))*dblJitter;
 	vecJitteredSpikes = vecJitteredSpikes + mean(vecJitteredSpikes); %center spikes on 0
