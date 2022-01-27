@@ -74,8 +74,9 @@ function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSam
 			vecUseSamples = (intCenterSample-intKernelStart):(intCenterSample+intKernelEnd);
 			vecUseSamples((vecUseSamples < 1) | (vecUseSamples > intSampNum)) = [];
 			vecSampT = vecTimestamps(vecUseSamples);
-			
-			vecTransientF(vecUseSamples) = vecTransientF(vecUseSamples) + fResp(vecSampT,dblSpikeT);
+			vecGenAct = fResp(vecSampT,dblSpikeT+dblHalfT_On*2);
+			vecGenAct(isnan(vecGenAct))=0;
+			vecTransientF(vecUseSamples) = vecTransientF(vecUseSamples) + vecGenAct;
 		end
 	end
 	%% add noise & compute dF/F0

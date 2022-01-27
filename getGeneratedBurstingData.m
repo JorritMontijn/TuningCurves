@@ -56,7 +56,9 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialRadians,m
 	vecStimDurs = vecStops-vecStarts;
 	vecBaseDurs = vecStarts(2:end) -  vecStops(1:(end-1));
 	vecBaseDurs(end+1) = median(vecBaseDurs);
-	
+	if isnan(vecBaseDurs)
+		vecBaseDurs = 0;
+	end
 	%% generate preferred orientations
 	if ~exist('dblPrefOri','var') || isempty(dblPrefOri)
 		dblPrefOri = rand(1)*2*pi;
@@ -137,7 +139,7 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedBurstingData(vecTrialRadians,m
 	boolDone = false;
 	indKeepBursts = true(size(vecAllBursts));
 	intLastBurst = 1;
-	while ~boolDone
+	while ~isempty(vecAllBursts) && ~boolDone
 		dblLastBurstStart = vecAllBursts(intLastBurst);
 		dblLastBurstDur = vecBurstDur(intLastBurst);
 		intNextBurst = find(vecAllBursts>dblLastBurstStart+dblLastBurstDur,1);
