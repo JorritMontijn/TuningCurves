@@ -36,11 +36,13 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	if range(vecStimOriDegrees) < (2*pi)
 		warning([mfilename ':PossiblyRadians'],sprintf('Range of angles is %d degrees, are you sure you are not supplying radians?',range(vecStimOriDegrees)));
 	elseif range(vecStimOriDegrees) > 180 %direction, full circle
+		boolDouble = false;
 		intParams = 5;
 		vecKappa = [1 1];
 		indKappa = logical([0 1 1 0 0]);
 		funcFit = @vonMisesDoubleFitPX;
 	else %orientation, half-circle
+		boolDouble = true;
 		intParams = 4;
 		vecKappa = 1;
 		indKappa = logical([0 1 0 0]);
@@ -107,11 +109,11 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 		vecP0 = [dblPrefOri vecKappa dblBaseline dblGain];
 		
 		%do fitting & save data
-		try
+		%try
 			matFittedParams(intNeuron,:) = lsqcurvefit(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
-		catch
-			matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
-		end
+		%catch
+		%	matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
+		%end
 		
 		%get R^2
 		vecFitR = feval(funcFit,matFittedParams(intNeuron,:),vecStimOriRads);
@@ -142,6 +144,15 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	end
 	
 	%% build output matrix
+	if boolDouble
+		%halve again
+		vecUniqueDegs = vecUniqueDegs./2;
+		vecUniqueRads = vecUniqueRads./2;
+		matVariance = matVariance./2;
+		matBandwidth = matBandwidth./2;
+		matFittedParams(:,indKappa) = matFittedParams(:,indKappa)./2;
+		matFittedParams(:,1) = matFittedParams(:,1)./2;
+	end
 	sOut = struct;
 	sOut.vecStimTypes = vecStimTypes;
 	sOut.vecUniqueDegs = vecUniqueDegs;
