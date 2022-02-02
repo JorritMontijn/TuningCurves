@@ -1,6 +1,6 @@
-function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSamplingFreq,sIndicatorProps,boolQuick)
+function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSamplingFreq,sIndicatorProps,boolQuick,dblEndTrace)
 	%getGeneratedFluorescence Generates fluorescence data from spike times
-	%   [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSamplingFreq,sIndicatorProps,boolQuick)
+	%   [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSamplingFreq,sIndicatorProps,boolQuick,dblEndTrace)
 	%
 	%sIndicatorProps: structure with fields suppling properties of fluorescence indicator:
 	%	- dblTimescale: scales indicator on/off half-lives (default: 1)
@@ -14,6 +14,7 @@ function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSam
 	%					uses filtering, assuming that all spike times occur at exactly the closest sample time
 	%				false:
 	%					uses subsample timing differences to calculate the indicator fluorescence
+	%dblEndTrace: double, time of last time-series data point
 	%
 	%Version History:
 	%2021-11-29 Created getGeneratedFluorescence function [by Jorrit Montijn]
@@ -32,6 +33,9 @@ function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSam
 	if ~exist('sIndicatorProps','var') || ~isstruct(sIndicatorProps)
 		sIndicatorProps = struct;
 	end
+	if ~exist('dblEndTrace','var') || ~isstruct(dblEndTrace)
+		dblEndTrace = (max(vecSpikeTimes)+dblSamplingFreq);
+	end
 	dblTimescale = getOr(sIndicatorProps,'dblTimescale',3);
 	dblHalfT_On = getOr(sIndicatorProps,'dblHalfT_On',dblTimescale*(10/1000));
 	dblHalfT_Off = getOr(sIndicatorProps,'dblHalfT_Off',dblTimescale*(63/1000));
@@ -39,7 +43,7 @@ function [vecTimestamps,vecdFoF] = getGeneratedFluorescence(vecSpikeTimes,dblSam
 	dblNoise = getOr(sIndicatorProps,'dblNoise',5/100);
 	
 	%build sample times
-	vecSampleEdges = 0:1/dblSamplingFreq:(max(vecSpikeTimes)+dblSamplingFreq);
+	vecSampleEdges = 0:1/dblSamplingFreq:(dblEndTrace + 0.5/dblSamplingFreq);
 	vecTimestamps = vecSampleEdges(2:end) - 0.5/dblSamplingFreq;
 		
 	%build kernel
