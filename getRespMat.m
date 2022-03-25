@@ -47,8 +47,8 @@ function [matTE,vecWindowBinCenters] = getRespMat(vecTime,vecVals,vecEvents,vecW
 			%retrieve target entries
 			vecAssignPoints = 1:intWindowSize;
 			intStart = find(vecTime >= vecEventStarts(intEvent),1);
-			intStop = find(vecTime >= vecEventStops(intEvent),1);
-			if isempty(intStop) %out-of-bounds at end
+			intStop = intStart + intWindowSize - 1;
+			if intStop > numel(vecTime) %out-of-bounds at end
 				intStop=numel(vecTime);
 				vecUsePoints = intStart:intStop;
 				vecAssignPoints((numel(vecUsePoints)+1):end) = []; %remove out-of-bounds entries
