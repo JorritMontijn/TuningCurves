@@ -71,7 +71,7 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	vecFitP = nan(intNeurons,1);
 		
 	try
-		sOptions = optimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
+		sOptions = optimoptions('lsqcurvefit','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
 	catch
 		sOptions = curvefitoptimoptions('curvefitfun','MaxFunEvals',1000,'MaxIter',1000,'Display','off');
 	end
@@ -109,11 +109,11 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 		vecP0 = [dblPrefOri vecKappa dblBaseline dblGain];
 		
 		%do fitting & save data
-		%try
+		try
 			matFittedParams(intNeuron,:) = lsqcurvefit(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
-		%catch
-		%	matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
-		%end
+		catch
+			matFittedParams(intNeuron,:) = curvefitfun(funcFit, vecP0, vecStimOriRads, vecResp,[0 eps*vecKappa min(vecMeanRespPerOri) 0],[2*pi 1000*vecKappa mean(vecMeanRespPerOri) 1000],sOptions);
+		end
 		
 		%get R^2
 		vecFitR = feval(funcFit,matFittedParams(intNeuron,:),vecStimOriRads);
