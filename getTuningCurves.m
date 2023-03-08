@@ -31,6 +31,9 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	if ~exist('boolPlot','var') || isempty(boolPlot),boolPlot=false;end
 	matResp = double(matResp);
 	%vecStimOriDegrees =  vecTrialOris;
+	if any(isnan(matResp(:)))
+		error([mfilename ':ValueIsNaN'],'Input matrix contains NaN values');
+	end
 	
 	%% check ori or dir
 	if range(vecStimOriDegrees) < (2*pi)
