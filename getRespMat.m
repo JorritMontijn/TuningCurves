@@ -12,6 +12,8 @@ function [matTE,vecWindowBinCenters] = getRespMat(vecTime,vecVals,vecEvents,vecW
 	%		matTE(intTimeBin,intEvent)
 	%	- vecWindowBinCenters, vector containing timestamps per bin
 	%
+	%For a spike time version, see getSpikeCounts: matSpikeCounts = getSpikeCounts(varData,vecStart,vecStop)
+	%
 	%	Version history:
 	%	1.0 - 2021 August 10
 	%	Created by Jorrit Montijn

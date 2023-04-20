@@ -28,6 +28,9 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,mat
 	vecBaseDurs = vecStarts(2:end) -  vecStops(1:(end-1));
 	vecBaseDurs(end+1) = median(vecBaseDurs);
 	%% generate preferred orientations
+	if range(vecTrialAngles) > (2*pi)
+		error([mfilename ':AnglesNotInRadians'],'Range of angles is >2pi');
+	end
 	if ~exist('dblPrefOri','var') || isempty(dblPrefOri)
 		dblPrefOri = rand(1)*2*pi;
 	end
