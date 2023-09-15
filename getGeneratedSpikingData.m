@@ -1,6 +1,6 @@
 function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingData(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblKappa,boolDoublePeaked,dblPrefOri)
 	%getGeneratedData Generates neural data using von Mises tuning curves
-	%    matResp = getGeneratedSpikingData(intN,intRep,dblKappa,dblDistDprime)
+	%    matResp = getGeneratedSpikingData(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblKappa,boolDoublePeaked,dblPrefOri)
 	%
 	%
 	%Version History:

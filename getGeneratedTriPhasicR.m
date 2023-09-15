@@ -2,8 +2,14 @@ function [vecSpikeTimes,vecEventStarts] = getGeneratedTriPhasicR(m,Tr,T,tau,L_b,
 	%getGeneratedTriPhasicR Generates triphasic neural data exponential ISI times
 	%    [vecSpikeTimes,vecEventStarts] = getGeneratedTriPhasicR(m,Tr,T,tau,L_b,L_s)
 	%
-	%
-	
+	%m: intTrialNum
+    %Tr: response dur
+    %T: trial dur
+    %tau: total dur
+    %L_b: base rate
+	%L_s: stim rate
+    %rate is 0 between Tr and T
+    
 	n_r = L_s*T;
 	L_r = n_r/Tr;
 	
