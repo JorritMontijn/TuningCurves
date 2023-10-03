@@ -1,6 +1,6 @@
-function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri,intAddSpikes,dblStartDelay)
+function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri,intAddSpikes,dblStartDelay,dblPeakDelay)
 	%getGeneratedSpikingDataWithPeak Generates neural data using von Mises tuning curves
-	%   [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri,intAddSpikes,dblStartDelay)
+	%   [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAngles,matTrialT,dblBaseRate,dblPrefRate,dblJitter,dblKappa,boolDoublePeaked,dblPrefOri,intAddSpikes,dblStartDelay,dblPeakDelay)
 	%
 	%
 	%Version History:
@@ -26,6 +26,9 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAn
 	end
 	if ~exist('dblStartDelay','var') || isempty(dblStartDelay)
 		dblStartDelay = 0.1;
+	end
+	if ~exist('dblPeakDelay','var') || isempty(dblPeakDelay)
+		dblPeakDelay = dblStartDelay;
 	end
 	
 	%% get timings
@@ -63,7 +66,7 @@ function [vecSpikeTimes,dblPrefOri] = getGeneratedSpikingDataWithPeak(vecTrialAn
 	%vecJitteredSpikes = (rand(size(vecChooseTrials))*0.002-0.001)*dblJitter;
 	vecJitteredSpikes = 0.001*randn(size(vecChooseTrials))*dblJitter;
 	vecJitteredSpikes = vecJitteredSpikes + mean(vecJitteredSpikes); %center spikes on 0
-	vecPeakSpikes = vecJitteredSpikes(:) + vecTrialStarts(vecChooseTrials);
+	vecPeakSpikes = vecJitteredSpikes(:) + vecTrialStarts(vecChooseTrials) + dblPeakDelay;
 	
 	%generate leading baseline
 	vecITI = exprnd(1/dblBaseRate,[1 round(dblBaseRate*vecStarts(1)*10)]);
