@@ -18,7 +18,7 @@ function [matRespNSR,vecStimTypes,vecUnique] = getStimulusResponses(matResp,vecS
 	%neuron x trial
 	intNeurons = size(matResp,1);
 	intTrials = size(matResp,2);
-	[vecStimTypes,vecUnique,vecRepetitions] = label2idx(vecStimTypeList);
+	[vecStimTypes,vecUnique,vecRepetitions] = val2idx(vecStimTypeList);
 	vecStimTypes = vecStimTypes(:)';
 	intStimTypes = numel(unique(vecStimTypes));
 	intRepetitions = max(vecRepetitions);

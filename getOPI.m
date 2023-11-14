@@ -20,7 +20,7 @@ function [vecOPI,vecAngleResp] = getOPI(matResp,vecTrialAngles)
 	matResp = bsxfun(@minus,matResp,min(matResp,[],2));
 	intN = size(matResp,1);
 	vecOPI = nan(intN,1);
-	vecAngleIdx = label2idx(vecTrialAngles);
+	vecAngleIdx = val2idx(vecTrialAngles);
 	vecUniqueAngles = unique(vecTrialAngles);
 	intStimNum = numel(vecUniqueAngles);
 	
