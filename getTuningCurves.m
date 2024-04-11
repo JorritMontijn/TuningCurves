@@ -36,9 +36,10 @@ function [sOut] = getTuningCurves(matResp,vecStimOriDegrees,boolPlot)
 	end
 	
 	%% check ori or dir
-	if range(vecStimOriDegrees) < (2*pi)
+	if range(vecStimOriDegrees) <= (2*pi)
 		warning([mfilename ':PossiblyRadians'],sprintf('Range of angles is %d degrees, are you sure you are not supplying radians?',range(vecStimOriDegrees)));
-	elseif range(vecStimOriDegrees) > 180 %direction, full circle
+	end
+	if range(vecStimOriDegrees) > 180 %direction, full circle
 		boolDouble = false;
 		intParams = 5;
 		vecKappa = [1 1];
